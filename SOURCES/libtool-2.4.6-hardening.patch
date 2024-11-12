@@ -1,14 +1,40 @@
+libtool: Enable hardening in libltdl
+
+See the rhbz#1289759 and rhbz#1214506.  We disable hardening namely because
+that bakes the CFLAGS/LDFLAGS into installed /bin/libtool and ltmain.sh files.
+At the same time we want to have libltdl.so hardened.  Downstream-only patch.
+
+---
+
 diff --git a/Makefile.am b/Makefile.am
 index 13dfc63..5c5603a 100644
 --- a/Makefile.am
 +++ b/Makefile.am
-@@ -311,6 +311,9 @@ libtool: $(ltmain_sh) $(config_status) $(dotversion)
+@@ -309,10 +309,27 @@
+ ## Libltdl. ##
+ ## -------- ##
  
  include libltdl/ltdl.mk
  
-+libltdl_libltdl_la_CPPFLAGS += $(CUSTOM_LTDL_CFLAGS)
++libltdl_libltdl_la_CFLAGS = $(CUSTOM_LTDL_CFLAGS)
 +libltdl_libltdl_la_LDFLAGS  += $(CUSTOM_LTDL_LDFLAGS)
++
++libltdl_dlopen_la_LDFLAGS  += $(CUSTOM_LTDL_LDFLAGS)
++libltdl_dld_link_la_LDFLAGS  += $(CUSTOM_LTDL_LDFLAGS)
++libltdl_dyld_la_LDFLAGS  += $(CUSTOM_LTDL_LDFLAGS)
++libltdl_load_add_on_la_LDFLAGS  += $(CUSTOM_LTDL_LDFLAGS)
++libltdl_loadlibrary_la_LDFLAGS  += $(CUSTOM_LTDL_LDFLAGS)
++libltdl_shl_load_la_LDFLAGS  += $(CUSTOM_LTDL_LDFLAGS)
++
++libltdl_dlopen_la_CFLAGS  = $(CUSTOM_LTDL_CFLAGS)
++libltdl_dld_link_la_CFLAGS  = $(CUSTOM_LTDL_CFLAGS)
++libltdl_dyld_la_CFLAGS  = $(CUSTOM_LTDL_CFLAGS)
++libltdl_load_add_on_la_CFLAGS  = $(CUSTOM_LTDL_CFLAGS)
++libltdl_loadlibrary_la_CFLAGS  = $(CUSTOM_LTDL_CFLAGS)
++libltdl_shl_load_la_CFLAGS  = $(CUSTOM_LTDL_CFLAGS)
 +
  lt_aclocal_m4	= $(srcdir)/$(ltdl_dir)/aclocal.m4
  lt_config_h_in	= $(srcdir)/$(ltdl_dir)/config-h.in
  lt_configure	= $(srcdir)/$(ltdl_dir)/configure
+ lt_configure_ac	= $(srcdir)/$(ltdl_dir)/configure.ac
+ stamp_mk	= $(srcdir)/$(ltdl_dir)/stamp-mk
